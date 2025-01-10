@@ -33,6 +33,12 @@ class Settings(BaseSettings):
     redis_retry_attempts: int = 3
     redis_health_check_interval: int = 30
 
+    # Database Pool
+    db_pool_size: int = 10
+    db_max_overflow: int = 20
+    db_pool_timeout: int = 30
+    db_pool_recycle: int = 3600
+
     # Embedding & LLM Models
     embedding_model: str = "embed-multilingual-v3.0"
     llm_model: str = "command-a-03-2025"
