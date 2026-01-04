@@ -33,6 +33,7 @@
   /* Metrics */
   --space-unit: 8px;
   --header-height: 70px;
+  --footer-height: 36px;
 }
 
 /* Base Reset */
@@ -48,6 +49,45 @@ body {
   min-height: 100vh;
   display: flex; flex-direction: column;
   overflow-x: hidden;
+  padding-bottom: var(--footer-height); /* Ensure content doesn't hide behind footer */
+}
+
+/* ============================================
+   SYSTEM FOOTER (Status Bar)
+   ============================================ */
+.footer {
+  position: fixed;
+  bottom: 0; left: 0; width: 100%;
+  height: var(--footer-height);
+  background-color: var(--sys-panel);
+  border-top: 1px solid var(--border-dim);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  z-index: 100;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.footer-section {
+  display: flex; gap: 1.5rem;
+}
+
+.footer-item {
+  display: flex; align-items: center; gap: 0.5rem;
+}
+
+.footer-val {
+  color: var(--text-secondary);
+}
+
+.footer-indicator {
+  width: 6px; height: 6px; background: var(--success);
+  border-radius: 50%; display: inline-block;
 }
 
 /* ============================================

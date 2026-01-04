@@ -35,13 +35,26 @@
       {% block content %}{% endblock %}
     </main>
     
-    <!-- Footer -->
+    <!-- Footer (System Bar) -->
     <footer class="footer">
-      <p>
-        RAG Agentic Chatbot &copy; 2026 | 
-        Powered by <a href="https://cohere.com" target="_blank">Cohere AI</a> & 
-        <a href="https://fastapi.tiangolo.com" target="_blank">FastAPI</a>
-      </p>
+      <div class="footer-section">
+        <div class="footer-item">
+          <span class="footer-indicator"></span>
+          <span>SYS.VER: <span class="footer-val">3.1.0-RC</span></span>
+        </div>
+        <div class="footer-item">
+          <span>LATENCY: <span class="footer-val">24ms</span></span>
+        </div>
+        <div class="footer-item">
+          <span>MEM: <span class="footer-val">42%</span></span>
+        </div>
+      </div>
+      
+      <div class="footer-section">
+        <div class="footer-item">
+          <span>PWR: <span class="footer-val">COHERE + FASTAPI</span></span>
+        </div>
+      </div>
     </footer>
     
     <!-- Scripts -->
