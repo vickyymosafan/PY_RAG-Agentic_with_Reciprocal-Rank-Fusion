@@ -5,16 +5,16 @@
 <div class="chat-container" x-data="chatApp()">
     
     <!-- Chat Header (Terminal Bar) -->
-    <div class="chat-header">
+    <div class="chat-header" style="padding: 1rem 15%; border-bottom: 1px solid var(--border-dim);">
         <div class="flex-center gap-2">
-            <span class="sys-badge" style="color: var(--primary)">TERMINAL_01</span>
-            <span class="font-mono" style="font-size: 0.8rem; color: var(--text-secondary)">SECURE CHANNEL // ENCRYPTED</span>
+            <span class="sys-badge" style="color: var(--primary); margin-bottom: 0;">AGENTIC_CHAT</span>
+            <span class="font-mono" style="font-size: 0.8rem; color: var(--text-secondary)">SECURE CHANNEL</span>
         </div>
         <div class="flex-center gap-2">
-            <div class="status-indicator online"></div>
-            <span class="font-mono" style="font-size: 0.75rem" x-text="sessionId ? 'SID: ' + sessionId.substring(0,8) : 'DISCONNECTED'"></span>
-            <button @click="clearHistory()" class="btn btn-sm btn-secondary" style="margin-left: 1rem; border: 1px solid var(--border-dim)">
-                CLR_LOGS
+            <div class="status-indicator" :class="sessionId ? 'online' : ''"></div>
+            <span class="font-mono" style="font-size: 0.75rem" x-text="sessionId ? 'CONNECTED' : 'STANDBY'"></span>
+            <button @click="clearHistory()" class="btn btn-sm btn-secondary" style="margin-left: 1rem;">
+                CLEAR
             </button>
         </div>
     </div>

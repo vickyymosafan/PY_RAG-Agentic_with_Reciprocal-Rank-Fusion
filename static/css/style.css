@@ -325,15 +325,18 @@ h1, h2, h3, h4 {
 }
 
 /* ============================================
-   CHAT UI (Terminal Style)
+   CHAT UI (Fullscreen Agentic Terminal)
    ============================================ */
 .chat-container {
-  height: calc(100vh - var(--header-height) - 4rem);
-  max-width: 1000px;
-  margin: 0 auto;
-  border: 1px solid var(--border-dim);
-  background-color: var(--sys-panel);
-  display: flex; flex-direction: column;
+  position: fixed;
+  top: var(--header-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--sys-bg);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
 }
 
 .chat-header {
@@ -345,13 +348,17 @@ h1, h2, h3, h4 {
 .chat-messages {
   flex: 1;
   overflow-y: auto;
-  padding: 2rem;
-  display: flex; flex-direction: column; gap: 2rem;
+  padding: 2rem 15%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .message {
-  display: flex; gap: 1rem;
-  max-width: 90%;
+  display: flex;
+  gap: 1rem;
+  max-width: 800px;
+  width: 100%;
 }
 
 .message.user {
@@ -380,8 +387,8 @@ h1, h2, h3, h4 {
 
 .chat-input {
   border-top: 1px solid var(--border-dim);
-  padding: 1rem;
-  background-color: var(--sys-bg);
+  padding: 1.5rem 15%;
+  background-color: var(--sys-panel);
 }
 
 .input-group {
