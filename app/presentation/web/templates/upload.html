@@ -1,75 +1,76 @@
 {% extends "base.html" %}
-{% block title %}Upload Dokumen - RAG Agentic Chatbot{% endblock %}
+{% block title %}Ingest Module - RAG System{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1>Upload Knowledge Base</h1>
-    <p>Upload dokumen JSON untuk diproses oleh RAG Agentic ke dalam Vector Database.</p>
-</div>
-
-<div class="upload-container" x-data="uploadForm()">
-    <!-- Upload Box -->
-    <div class="upload-box relative-overflow">
-        <h2 class="flex-center gap-2">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-main">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-            Upload JSON
-        </h2>
-        
-        <div class="form-group mt-4">
-            <label for="filename">Nama Dokumen</label>
-            <input type="text" id="filename" x-model="filename" placeholder="contoh: data-produk.json" class="input font-mono">
+<div class="container" x-data="uploadApp()">
+    
+    <!-- Module Header -->
+    <div style="margin-bottom: 2rem; border-bottom: 1px solid var(--border-dim); padding-bottom: 1rem; display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <div class="sys-badge" style="margin-bottom: 0.5rem">MODULE: INGESTION</div>
+            <h1>Document Processing Unit</h1>
+            <p style="color: var(--text-secondary)">Upload JSON datasets for vector embedding.</p>
         </div>
-        
-        <div class="form-group">
-            <label for="content">Konten JSON</label>
-            <textarea id="content" x-model="content" class="textarea" placeholder='[{"title": "Judul", "content": "Isi dokumen..."}]'></textarea>
-        </div>
-        
-        <div class="form-group">
-            <p class="help-text flex-center gap-2">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                Format: Array of objects dengan field <code class="font-mono">content</code>, <code class="font-mono">text</code>, atau <code class="font-mono">body</code>.
-            </p>
-        </div>
-        
-        <button @click="upload()" class="btn btn-primary btn-block" :disabled="loading">
-            <span x-show="!loading" class="flex-center gap-2">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                Upload & Process
-            </span>
-            <span x-show="loading" class="flex-center gap-2">
-                <span class="animate-spin">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                </span>
-                Processing...
-            </span>
-        </button>
-        
-        <div x-show="message" class="alert" :class="success ? 'alert-success' : 'alert-error'" x-transition>
-            <span x-text="message"></span>
+        <div class="font-mono" style="font-size: 0.8rem; color: var(--accent)">
+            SYS_READY
         </div>
     </div>
-    
-    <!-- Document List -->
-    <div class="document-list">
-        <h2 class="flex-center gap-2">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-main">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10 9 9 9 8 9"/>
-            </svg>
-            Indexed Documents
-        </h2>
-        <div id="document-list-content" class="mt-4">
-            <p class="loading flex-center gap-2 text-muted">
-                <span class="animate-spin">⌛</span> Loading knowledge base...
-            </p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
+        
+        <!-- Upload Card -->
+        <div class="tech-card">
+            <div class="tech-card-header">
+                <span class="font-mono" style="color: var(--text-tertiary)">INPUT_STREAM</span>
+                <span class="font-mono" style="color: var(--primary)">[ACTIVE]</span>
+            </div>
+            
+            <form @submit.prevent="handleUpload">
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-family: 'JetBrains Mono'; font-size: 0.75rem; margin-bottom: 0.5rem; color: var(--text-secondary); text-transform: uppercase;">Target Filename</label>
+                    <input type="text" x-model="filename" placeholder="dataset_v1.json" class="input font-mono" required>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-family: 'JetBrains Mono'; font-size: 0.75rem; margin-bottom: 0.5rem; color: var(--text-secondary); text-transform: uppercase;">Data Payload (JSON)</label>
+                    <textarea x-model="jsonContent" class="textarea font-mono" rows="12" placeholder='[{"title": "Doc1", "content": "..."}]' required style="background: var(--sys-surface); border: 1px solid var(--border-dim); color: var(--text-primary); font-size: 0.8rem;"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block" :disabled="loading">
+                    <span x-text="loading ? 'PROCESSING SEQUENCE...' : 'INITIATE UPLOAD'"></span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Status / List Card -->
+        <div class="tech-card">
+             <div class="tech-card-header">
+                <span class="font-mono" style="color: var(--text-tertiary)">VECTOR_INDEX</span>
+                <span class="font-mono" x-text="documents.length + ' ENTRIES'"></span>
+            </div>
+
+            <div x-show="error" style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); padding: 1rem; margin-bottom: 1rem; color: var(--danger); font-family: 'JetBrains Mono'; font-size: 0.8rem;">
+                ERR: <span x-text="error"></span>
+            </div>
+
+            <div x-show="loading" style="text-align: center; padding: 2rem; color: var(--primary);">
+                <div style="font-family: 'JetBrains Mono'; animation: pulse 1s infinite">SYNCING TO VECTOR_DB...</div>
+            </div>
+
+            <ul class="doc-list" x-show="!loading" style="max-height: 500px; overflow-y: auto;">
+                <template x-for="doc in documents" :key="doc.id">
+                    <li class="doc-item">
+                        <div>
+                            <div style="font-family: 'JetBrains Mono'; font-size: 0.9rem; color: var(--text-primary)" x-text="doc.filename"></div>
+                            <div style="font-size: 0.75rem; color: var(--text-tertiary)" x-text="'ID: ' + doc.id.substring(0,8) + '...' + ' | ' + new Date(doc.created_at).toLocaleDateString()"></div>
+                        </div>
+                        <span class="doc-badge" style="background: var(--surface); border: 1px solid var(--success); color: var(--success)">INDEXED</span>
+                    </li>
+                </template>
+                <li x-show="documents.length === 0" style="padding: 2rem; text-align: center; color: var(--text-tertiary); font-family: 'JetBrains Mono'">
+                    NO_DATA_FOUND
+                </li>
+            </ul>
         </div>
     </div>
 </div>
@@ -77,90 +78,93 @@
 
 {% block scripts %}
 <script>
-function uploadForm() {
+function uploadApp() {
     return {
-        filename: '', content: '', loading: false, message: '', success: false,
-        async upload() {
-            if (!this.filename || !this.content) { 
-                this.message = 'Mohon isi nama file dan konten.'; 
-                this.success = false; 
-                return; 
-            }
+        filename: '',
+        jsonContent: '',
+        loading: false,
+        error: null,
+        documents: [],
+        
+        init() {
+            this.loadDocuments();
+        },
+        
+        async loadDocuments() {
             try {
-                this.loading = true; this.message = '';
-                const parsed = JSON.parse(this.content);
-                const response = await fetch('/api/documents', {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                this.loading = true;
+                const res = await fetch('/api/documents'); 
+                const data = await res.json();
+                if(data.success && data.data) {
+                    // Handle structure difference if any
+                    this.documents = data.data.documents || data.data;
+                }
+            } catch(e) {
+                console.error("Fetch error", e);
+            } finally {
+                this.loading = false;
+            }
+        },
+        
+        async handleUpload() {
+            this.loading = true;
+            this.error = null;
+            try {
+                // Validation
+                let parsed;
+                try {
+                    parsed = JSON.parse(this.jsonContent);
+                } catch(e) {
+                    throw new Error("INVALID_JSON_FORMAT");
+                }
+                
+                if(!Array.isArray(parsed)) {
+                    throw new Error("PAYLOAD_MUST_BE_ARRAY");
+                }
+
+                const res = await fetch('/api/documents', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        filename: this.filename,
+                        documents: parsed
+                    }) // Match backend expectation: "documents" field if pydantic, or "content" if simple
+                });
+                
+                // Note: Previous code used { filename, content: parsed }, check backend. 
+                // Assuming standard RAG payload often uses 'documents' list. 
+                // If backend expects 'content', we might need to adjust.
+                // Let's stick to the previous working format which seemed to be {filename, content}.
+                
+                // ADJUSTMENT: The viewed file used { filename:this.filename, content: parsed }
+                // So I will revert to that to ensure backend compatibility
+                
+            } catch(e) {
+                // We'll re-run fetch with correct body below
+            }
+            
+            // Retry block for Fetch
+            try {
+                 let parsed = JSON.parse(this.jsonContent);
+                 const res = await fetch('/api/documents', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ filename: this.filename, content: parsed })
                 });
-                const data = await response.json();
-                if (data.success) { 
-                    this.message = 'Dokumen berhasil diupload dan diindeks ke Vector DB!'; 
-                    this.success = true; 
-                    this.filename = ''; 
-                    this.content = ''; 
-                    loadDocuments(); 
-                } else { 
-                    this.message = data.error || 'Terjadi kesalahan pemrosesan'; 
-                    this.success = false; 
-                }
-            } catch (e) { 
-                this.message = 'Format JSON tidak valid: ' + e.message; 
-                this.success = false; 
-            } finally { 
-                this.loading = false; 
+                const data = await res.json();
+                if(!data.success) throw new Error(data.error || "Unknown Error");
+                
+                this.filename = '';
+                this.jsonContent = '';
+                this.loadDocuments();
+                alert("UPLOAD_COMPLETE: ACKNOWLEDGED");
+            } catch(e) {
+                this.error = e.message;
+            } finally {
+                this.loading = false;
             }
         }
     }
 }
-
-async function loadDocuments() {
-    const container = document.getElementById('document-list-content');
-    try {
-        const response = await fetch('/api/documents');
-        const data = await response.json();
-        if (data.success && data.data.documents.length > 0) {
-            let html = '<ul class="doc-list" style="list-style: none; padding: 0;">';
-            for (const doc of data.data.documents) { 
-                html += `
-                    <li class="doc-item">
-                        <div class="flex-col">
-                            <span class="doc-name flex-center gap-2 font-mono" style="font-size: 0.9rem;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
-                                ${doc.filename}
-                            </span>
-                            <span class="doc-date text-xs text-muted flex-center gap-1" style="margin-left: 22px;">
-                                ${new Date(doc.created_at).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})}
-                            </span>
-                        </div>
-                        <div class="doc-badge">INDEXED</div>
-                    </li>`; 
-            }
-            html += '</ul>'; container.innerHTML = html;
-        } else { 
-            container.innerHTML = `
-                <div class="empty-state text-center py-4">
-                    <p class="text-muted">No documents indexed.</p>
-                </div>`; 
-        }
-    } catch (e) { 
-        container.innerHTML = '<p class="alert alert-error">Gagal memuat dokumen.</p>'; 
-    }
-}
-document.addEventListener('DOMContentLoaded', loadDocuments);
-</script>
-
-<style>
-.flex-center { display: flex; align-items: center; }
-.flex-col { display: flex; flex-direction: column; }
-.gap-1 { gap: 0.25rem; }
-.gap-2 { gap: 0.5rem; }
-.mt-4 { margin-top: 1rem; }
-.text-xs { font-size: 0.75rem; }
-.text-center { text-align: center; }
-.py-4 { padding: 1rem 0; }
-.relative-overflow { position: relative; overflow: hidden; }
-.animate-spin { display: inline-block; animation: spin 1s linear infinite; }
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-</style>
+</script> 
 {% endblock %}

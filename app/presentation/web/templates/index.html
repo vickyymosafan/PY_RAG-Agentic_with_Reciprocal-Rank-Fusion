@@ -1,185 +1,87 @@
-{% extends "base.html" %} {% block title %}Home - RAG Chatbot | AI-Powered
-Knowledge Assistant{% endblock %} {% block content %}
+{% extends "base.html" %} {% block title %}High-Fidelity RAG Agentic{% endblock %} {% block content %}
 <div class="hero">
-  <!-- Hero Badge -->
-  <div class="hero-badge">
-    <span class="pulse"></span>
-    <span>Powered by Cohere AI & Hybrid Search</span>
+  <!-- System Status Badge -->
+  <div class="sys-badge">
+    <span style="color: var(--success)">●</span> SYSTEM.STATUS: ONLINE
   </div>
 
   <!-- Hero Title -->
-  <h1>RAG Agentic Chatbot</h1>
+  <h1>RAG AGENTIC<br>CONTROL SYSTEM</h1>
   <p class="hero-subtitle">
-    Sistem AI cerdas yang mengombinasikan
-    <strong>Retrieval Augmented Generation</strong> dengan
-    <strong>Reciprocal Rank Fusion</strong> untuk menjawab pertanyaan
-    berdasarkan dokumen Anda.
+    Advanced Retrieval Augmented Generation [v.2.0]<br>
+    Powered by Reciprocal Rank Fusion Algorithm.
   </p>
 
-  <!-- Pipeline Visualization -->
-  <!-- Schematic Pipeline Visualization (Flat) -->
+  <!-- Pipeline Visualization (Technical) -->
   <div class="pipeline">
-    <div class="pipeline-step">
-      <div class="pipeline-icon-box">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      </div>
-      <span class="pipeline-label">DOCUMENTS</span>
+    <div class="pipeline-node">
+      DOC
+      <div style="font-size: 0.6rem; color: var(--text-tertiary)">[SRC]</div>
     </div>
-    
-    <div class="pipeline-connector"></div>
-    
-    <div class="pipeline-step">
-      <div class="pipeline-icon-box">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      </div>
-      <span class="pipeline-label">RETRIEVAL</span>
+    <div class="pipeline-line"></div>
+    <div class="pipeline-node">
+      VEC-DB
+      <div style="font-size: 0.6rem; color: var(--text-tertiary)">[IDX]</div>
     </div>
-    
-    <div class="pipeline-connector"></div>
-    
-    <div class="pipeline-step">
-      <div class="pipeline-icon-box">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      </div>
-      <span class="pipeline-label">RANKING</span>
+    <div class="pipeline-line"></div>
+    <div class="pipeline-node" style="border-color: var(--primary); color: var(--primary)">
+      LLM
+      <div style="font-size: 0.6rem; opacity: 0.7">[GEN]</div>
     </div>
-    
-    <div class="pipeline-connector"></div>
-    
-    <div class="pipeline-step">
-      <div class="pipeline-icon-box">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.28 1.28L3 12l5.8 1.9a2 2 0 0 1 1.28 1.28L12 21l1.9-5.8a2 2 0 0 1 1.28-1.28L21 12l-5.8-1.9a2 2 0 0 1-1.28-1.28Z"/></svg>
-      </div>
-      <span class="pipeline-label">OUTPUT</span>
+    <div class="pipeline-line"></div>
+    <div class="pipeline-node">
+      OUT
+      <div style="font-size: 0.6rem; color: var(--text-tertiary)">[RES]</div>
     </div>
   </div>
 
-  <!-- Feature Cards -->
-  <div class="hero-features">
-    <div class="feature-card">
-      <div class="feature-icon">
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path
-            d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"
-          ></path>
-          <polyline points="14 2 14 8 20 8"></polyline>
-          <line x1="12" y1="18" x2="12" y2="12"></line>
-          <line x1="9" y1="15" x2="15" y2="15"></line>
-        </svg>
+  <!-- Feature Grid (Tech Cards) -->
+  <div class="hero-features" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 4rem;">
+    <!-- Card 1 -->
+    <div class="tech-card">
+      <div class="tech-card-header">
+        <span class="font-mono" style="font-size: 0.7rem; color: var(--accent)">MOD_01</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       </div>
-      <h3>Upload Dokumen</h3>
-      <p>
-        Upload dokumen JSON untuk membangun knowledge base yang akan diproses
-        dan diindeks secara otomatis.
+      <h3>INGEST_DOCS</h3>
+      <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary)">
+        Initiate document processing sequence. Chunking and Vector Embedding protocols active.
       </p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="11" cy="11" r="8"></circle>
-          <path d="m21 21-4.3-4.3"></path>
-          <path d="M11 8v6"></path>
-          <path d="M8 11h6"></path>
-        </svg>
+
+    <!-- Card 2 -->
+    <div class="tech-card">
+      <div class="tech-card-header">
+        <span class="font-mono" style="font-size: 0.7rem; color: var(--accent)">MOD_02</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </div>
-      <h3>Hybrid Search</h3>
-      <p>
-        Kombinasi BM25 + Vector Search dengan Reciprocal Rank Fusion untuk hasil
-        pencarian yang lebih akurat.
+      <h3>HYBRID_SEARCH</h3>
+      <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary)">
+        Execute BM25 + Vector similarity search. Reciprocal Rank Fusion optimization enabled.
       </p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-          <line x1="12" x2="12" y1="19" y2="22"></line>
-        </svg>
+
+    <!-- Card 3 -->
+    <div class="tech-card">
+      <div class="tech-card-header">
+        <span class="font-mono" style="font-size: 0.7rem; color: var(--accent)">MOD_03</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
       </div>
-      <h3>Chat Cerdas</h3>
-      <p>
-        Tanya jawab natural dengan AI yang memahami konteks dokumen dan
-        memberikan jawaban yang relevan.
+      <h3>NEURAL_CHAT</h3>
+      <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary)">
+        Context-aware generation interface. Low-latency response synthesis.
       </p>
     </div>
   </div>
 
   <!-- CTA Buttons -->
-  <div class="hero-actions">
+  <div class="hero-actions" style="display: flex; gap: 1rem; justify-content: center;">
     <a href="/upload" class="btn btn-primary">
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="17 8 12 3 7 8"></polyline>
-        <line x1="12" y1="3" x2="12" y2="15"></line>
-      </svg>
-      Upload Dokumen
+      INITIALIZE UPLOAD
     </a>
     <a href="/chat" class="btn btn-secondary">
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
-        <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"></path>
-      </svg>
-      Mulai Chat
+      LAUNCH TERMINAL
     </a>
   </div>
 </div>
-
-<!-- How to Use Section -->
-<section class="section">
-  <h2>📘 Cara Menggunakan</h2>
-  <ol class="steps">
-    <li>
-      <strong>Upload Dokumen</strong> - Siapkan file JSON dengan format:
-      <pre><code>[{"title": "Judul Dokumen", "content": "Isi konten dokumen..."}]</code></pre>
-    </li>
-    <li>
-      <strong>Tunggu Proses</strong> - Sistem akan memproses, chunking, dan
-      mengindeks dokumen Anda menggunakan vector embedding.
-    </li>
-    <li>
-      <strong>Mulai Chat</strong> - Ajukan pertanyaan dalam bahasa natural dan
-      dapatkan jawaban yang akurat berdasarkan dokumen.
-    </li>
-  </ol>
-</section>
 {% endblock %}
