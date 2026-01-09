@@ -1,38 +1,76 @@
 {% extends "base.html" %}
-{% block title %}Upload Dokumen - RAG Chatbot{% endblock %}
+{% block title %}Upload Dokumen - RAG Agentic Chatbot{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1>📤 Upload Dokumen</h1>
-    <p>Upload dokumen JSON untuk dijadikan knowledge base chatbot.</p>
+    <h1>Upload Knowledge Base</h1>
+    <p>Upload dokumen JSON untuk diproses oleh RAG Agentic ke dalam Vector Database.</p>
 </div>
 
 <div class="upload-container" x-data="uploadForm()">
-    <div class="upload-box">
-        <h2>Upload JSON</h2>
-        <div class="form-group">
-            <label for="filename">Nama File</label>
-            <input type="text" id="filename" x-model="filename" placeholder="contoh: data-produk.json" class="input">
+    <!-- Upload Box -->
+    <div class="upload-box relative-overflow">
+        <h2 class="flex-center gap-2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-main">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Upload JSON
+        </h2>
+        
+        <div class="form-group mt-4">
+            <label for="filename">Nama Dokumen</label>
+            <input type="text" id="filename" x-model="filename" placeholder="contoh: data-produk.json" class="input font-mono">
         </div>
+        
         <div class="form-group">
             <label for="content">Konten JSON</label>
-            <textarea id="content" x-model="content" rows="10" class="textarea" placeholder='[{"title": "Judul", "content": "Isi dokumen..."}]'></textarea>
+            <textarea id="content" x-model="content" class="textarea" placeholder='[{"title": "Judul", "content": "Isi dokumen..."}]'></textarea>
         </div>
+        
         <div class="form-group">
-            <p class="help-text">Format: Array of objects dengan field <code>content</code>, <code>text</code>, atau <code>body</code>.</p>
+            <p class="help-text flex-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                Format: Array of objects dengan field <code class="font-mono">content</code>, <code class="font-mono">text</code>, atau <code class="font-mono">body</code>.
+            </p>
         </div>
+        
         <button @click="upload()" class="btn btn-primary btn-block" :disabled="loading">
-            <span x-show="!loading">Upload Dokumen</span>
-            <span x-show="loading">⏳ Memproses...</span>
+            <span x-show="!loading" class="flex-center gap-2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload & Process
+            </span>
+            <span x-show="loading" class="flex-center gap-2">
+                <span class="animate-spin">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                </span>
+                Processing...
+            </span>
         </button>
-        <div x-show="message" class="alert" :class="success ? 'alert-success' : 'alert-error'">
+        
+        <div x-show="message" class="alert" :class="success ? 'alert-success' : 'alert-error'" x-transition>
             <span x-text="message"></span>
         </div>
     </div>
     
+    <!-- Document List -->
     <div class="document-list">
-        <h2>📚 Dokumen Tersimpan</h2>
-        <div id="document-list-content"><p class="loading">Loading...</p></div>
+        <h2 class="flex-center gap-2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-main">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+            </svg>
+            Indexed Documents
+        </h2>
+        <div id="document-list-content" class="mt-4">
+            <p class="loading flex-center gap-2 text-muted">
+                <span class="animate-spin">⌛</span> Loading knowledge base...
+            </p>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -43,7 +81,11 @@ function uploadForm() {
     return {
         filename: '', content: '', loading: false, message: '', success: false,
         async upload() {
-            if (!this.filename || !this.content) { this.message = 'Mohon isi nama file dan konten.'; this.success = false; return; }
+            if (!this.filename || !this.content) { 
+                this.message = 'Mohon isi nama file dan konten.'; 
+                this.success = false; 
+                return; 
+            }
             try {
                 this.loading = true; this.message = '';
                 const parsed = JSON.parse(this.content);
@@ -52,25 +94,73 @@ function uploadForm() {
                     body: JSON.stringify({ filename: this.filename, content: parsed })
                 });
                 const data = await response.json();
-                if (data.success) { this.message = data.message; this.success = true; this.filename = ''; this.content = ''; loadDocuments(); }
-                else { this.message = data.error || 'Terjadi kesalahan'; this.success = false; }
-            } catch (e) { this.message = 'Format JSON tidak valid: ' + e.message; this.success = false; }
-            finally { this.loading = false; }
+                if (data.success) { 
+                    this.message = 'Dokumen berhasil diupload dan diindeks ke Vector DB!'; 
+                    this.success = true; 
+                    this.filename = ''; 
+                    this.content = ''; 
+                    loadDocuments(); 
+                } else { 
+                    this.message = data.error || 'Terjadi kesalahan pemrosesan'; 
+                    this.success = false; 
+                }
+            } catch (e) { 
+                this.message = 'Format JSON tidak valid: ' + e.message; 
+                this.success = false; 
+            } finally { 
+                this.loading = false; 
+            }
         }
     }
 }
+
 async function loadDocuments() {
     const container = document.getElementById('document-list-content');
     try {
         const response = await fetch('/api/documents');
         const data = await response.json();
         if (data.success && data.data.documents.length > 0) {
-            let html = '<ul class="doc-list">';
-            for (const doc of data.data.documents) { html += `<li class="doc-item"><span class="doc-name">${doc.filename}</span><span class="doc-date">${new Date(doc.created_at).toLocaleDateString('id-ID')}</span></li>`; }
+            let html = '<ul class="doc-list" style="list-style: none; padding: 0;">';
+            for (const doc of data.data.documents) { 
+                html += `
+                    <li class="doc-item">
+                        <div class="flex-col">
+                            <span class="doc-name flex-center gap-2 font-mono" style="font-size: 0.9rem;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                ${doc.filename}
+                            </span>
+                            <span class="doc-date text-xs text-muted flex-center gap-1" style="margin-left: 22px;">
+                                ${new Date(doc.created_at).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})}
+                            </span>
+                        </div>
+                        <div class="doc-badge">INDEXED</div>
+                    </li>`; 
+            }
             html += '</ul>'; container.innerHTML = html;
-        } else { container.innerHTML = '<p class="empty">Belum ada dokumen.</p>'; }
-    } catch (e) { container.innerHTML = '<p class="error">Gagal memuat dokumen.</p>'; }
+        } else { 
+            container.innerHTML = `
+                <div class="empty-state text-center py-4">
+                    <p class="text-muted">No documents indexed.</p>
+                </div>`; 
+        }
+    } catch (e) { 
+        container.innerHTML = '<p class="alert alert-error">Gagal memuat dokumen.</p>'; 
+    }
 }
 document.addEventListener('DOMContentLoaded', loadDocuments);
 </script>
+
+<style>
+.flex-center { display: flex; align-items: center; }
+.flex-col { display: flex; flex-direction: column; }
+.gap-1 { gap: 0.25rem; }
+.gap-2 { gap: 0.5rem; }
+.mt-4 { margin-top: 1rem; }
+.text-xs { font-size: 0.75rem; }
+.text-center { text-align: center; }
+.py-4 { padding: 1rem 0; }
+.relative-overflow { position: relative; overflow: hidden; }
+.animate-spin { display: inline-block; animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
 {% endblock %}

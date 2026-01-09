@@ -3,24 +3,48 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="RAG Agentic Chatbot - AI-powered knowledge assistant dengan Retrieval Augmented Generation dan Reciprocal Rank Fusion" />
+    <meta name="theme-color" content="#8B5CF6" />
     <title>{% block title %}RAG Chatbot{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>" />
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="/static/css/style.css" />
+    
+    <!-- Scripts -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script defer src="https://unpkg.com/alpinejs@3.13.3/dist/cdn.min.js"></script>
   </head>
   <body>
+    <!-- Navigation -->
     <nav class="navbar">
-      <div class="nav-brand"><a href="/">🤖 RAG Chatbot</a></div>
+      <div class="nav-brand">
+        <a href="/">RAG Agentic</a>
+      </div>
       <div class="nav-links">
         <a href="/">Home</a>
         <a href="/upload">Upload</a>
         <a href="/chat">Chat</a>
       </div>
     </nav>
-    <main class="container">{% block content %}{% endblock %}</main>
+    
+    <!-- Main Content -->
+    <main class="container">
+      {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
     <footer class="footer">
-      <p>RAG Chatbot &copy; 2025 | Powered by Cohere & FastAPI</p>
+      <p>
+        RAG Agentic Chatbot &copy; 2026 | 
+        Powered by <a href="https://cohere.com" target="_blank">Cohere AI</a> & 
+        <a href="https://fastapi.tiangolo.com" target="_blank">FastAPI</a>
+      </p>
     </footer>
+    
+    <!-- Scripts -->
     <script src="/static/js/app.js"></script>
     {% block scripts %}{% endblock %}
   </body>
