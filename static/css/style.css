@@ -389,7 +389,7 @@ h1, h2, h3, h4 {
   top: var(--header-height);
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: var(--footer-height);
   background-color: var(--sys-bg);
   display: flex;
   flex-direction: column;
