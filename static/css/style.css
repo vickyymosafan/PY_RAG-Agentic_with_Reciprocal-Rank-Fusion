@@ -302,6 +302,23 @@ h1, h2, h3, h4 {
   background-image: radial-gradient(circle at center, rgba(124, 58, 237, 0.05) 0%, transparent 50%);
 }
 
+.hero-features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Enforce 3 columns strictly */
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+  max-width: 1200px; /* Restrict width to keep cards compact */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 900px) {
+  .hero-features {
+    grid-template-columns: 1fr; /* Stack on mobile */
+    max-width: 500px;
+  }
+}
+
 .sys-badge {
   display: inline-block;
   background-color: var(--sys-surface);
