@@ -1,8 +1,10 @@
 """Document Routes."""
 
+import json
+from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, File, HTTPException, UploadFile, status
 
 from app.application.dto.document_dto import (
     DocumentListResponse,
@@ -33,6 +35,55 @@ async def upload_document(
                 created_at=document.created_at,
             ),
             message=f"Dokumen berhasil diupload dengan {chunk_count} chunks",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router.post("/upload", response_model=APIResponse[DocumentResponse])
+async def upload_file(
+    file: Annotated[UploadFile, File(description="JSON file to ingest")],
+    ingest_use_case: IngestUseCaseDep,
+) -> APIResponse[DocumentResponse]:
+    """Upload a file directly (multipart/form-data)."""
+    # Validate file type
+    if not file.filename or not file.filename.endswith(".json"):
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Only .json files are supported",
+        )
+
+    try:
+        # Read and parse file content
+        content_bytes = await file.read()
+        content = json.loads(content_bytes.decode("utf-8"))
+
+        # Validate structure
+        if not isinstance(content, list):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="JSON content must be an array",
+            )
+
+        # Reuse existing ingest logic
+        document, chunk_count = await ingest_use_case.execute(
+            filename=file.filename, content=content
+        )
+
+        return APIResponse(
+            success=True,
+            data=DocumentResponse(
+                id=str(document.id),
+                filename=document.filename,
+                chunk_count=chunk_count,
+                metadata=document.metadata,
+                created_at=document.created_at,
+            ),
+            message=f"File ingested successfully with {chunk_count} chunks",
+        )
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid JSON format in file"
         )
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

@@ -43,21 +43,27 @@
                         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     </div>
                     
-                    <div x-show="!filename" style="color: var(--text-secondary); font-family: 'JetBrains Mono'">
+                    <div x-show="!selectedFile" style="color: var(--text-secondary); font-family: 'JetBrains Mono'">
                         DRAG_DROP_FILE or <span style="text-decoration: underline; color: var(--primary)">BROWSE_LOCALLY</span>
                     </div>
                     
-                    <div x-show="filename" style="color: var(--success); font-family: 'JetBrains Mono'">
-                        FILE_SELECTED: <span x-text="filename" style="font-weight: bold"></span>
-                        <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-top: 0.5rem">READY_TO_INGEST</div>
+                    <div x-show="selectedFile" style="color: var(--success); font-family: 'JetBrains Mono'">
+                        FILE_SELECTED: <span x-text="selectedFile?.name" style="font-weight: bold"></span>
+                        <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-top: 0.5rem">
+                            SIZE: <span x-text="formatFileSize(selectedFile?.size)"></span> | READY_TO_INGEST
+                        </div>
                     </div>
                 </div>
 
-                <div x-show="error" style="margin-bottom: 1rem; color: var(--danger); font-size: 0.8rem; font-family: 'JetBrains Mono'">
+                <div x-show="error" style="margin-bottom: 1rem; padding: 0.75rem; background: rgba(239,68,68,0.1); border: 1px solid var(--danger); color: var(--danger); font-size: 0.8rem; font-family: 'JetBrains Mono'">
                     ERR: <span x-text="error"></span>
                 </div>
+                
+                <div x-show="successMsg" style="margin-bottom: 1rem; padding: 0.75rem; background: rgba(16,185,129,0.1); border: 1px solid var(--success); color: var(--success); font-size: 0.8rem; font-family: 'JetBrains Mono'">
+                    <span x-text="successMsg"></span>
+                </div>
 
-                <button type="submit" class="btn btn-primary btn-block" :disabled="loading || !jsonContent">
+                <button type="submit" class="btn btn-primary btn-block" :disabled="loading || !selectedFile">
                     <span x-text="loading ? 'PROCESSING_STREAM...' : 'INITIATE_INGEST_SEQUENCE'"></span>
                 </button>
             </form>
@@ -80,7 +86,7 @@
                     <li class="doc-item">
                         <div>
                             <div style="font-family: 'JetBrains Mono'; font-size: 0.9rem; color: var(--text-primary)" x-text="doc.filename"></div>
-                            <div style="font-size: 0.75rem; color: var(--text-tertiary)" x-text="'ID: ' + doc.id.substring(0,8) + '...' + ' | ' + new Date(doc.created_at).toISOString().split('T')[0]"></div>
+                            <div style="font-size: 0.75rem; color: var(--text-tertiary)" x-text="'ID: ' + doc.id.substring(0,8) + '... | ' + new Date(doc.created_at).toISOString().split('T')[0]"></div>
                         </div>
                         <span class="doc-badge" style="background: var(--surface); border: 1px solid var(--success); color: var(--success)">INDEXED</span>
                     </li>
@@ -105,10 +111,10 @@
 <script>
 function uploadApp() {
     return {
-        filename: '',
-        jsonContent: null,
+        selectedFile: null,
         loading: false,
         error: null,
+        successMsg: null,
         dragover: false,
         documents: [],
         
@@ -116,9 +122,16 @@ function uploadApp() {
             this.loadDocuments();
         },
         
+        formatFileSize(bytes) {
+            if (!bytes) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        },
+        
         async loadDocuments() {
             try {
-                this.loading = true;
                 const res = await fetch('/api/documents'); 
                 const data = await res.json();
                 if(data.success) {
@@ -126,68 +139,62 @@ function uploadApp() {
                 }
             } catch(e) {
                 console.error("Fetch error", e);
-            } finally {
-                this.loading = false;
             }
         },
 
         handleDrop(e) {
             this.dragover = false;
             const files = e.dataTransfer.files;
-            if (files.length > 0) this.processFile(files[0]);
+            if (files.length > 0) this.selectFile(files[0]);
         },
 
         handleFileSelect(e) {
             const files = e.target.files;
-            if (files.length > 0) this.processFile(files[0]);
+            if (files.length > 0) this.selectFile(files[0]);
         },
 
-        processFile(file) {
+        selectFile(file) {
             this.error = null;
-            this.filename = file.name;
+            this.successMsg = null;
             
-            // Allow JSON files only for now
+            // Validate file type
             if (!file.name.endsWith('.json')) {
                 this.error = "INVALID_FILE_TYPE: Only .json supported";
-                this.jsonContent = null;
+                this.selectedFile = null;
                 return;
             }
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const content = JSON.parse(e.target.result);
-                    if (!Array.isArray(content)) throw new Error("Root must be Array");
-                    this.jsonContent = content; // Store parsed object
-                } catch (err) {
-                    this.error = "PARSE_ERROR: Invalid JSON";
-                    this.jsonContent = null;
-                }
-            };
-            reader.readAsText(file);
+            
+            this.selectedFile = file;
         },
         
         async handleUpload() {
-            if (!this.jsonContent) return;
+            if (!this.selectedFile) return;
             
             this.loading = true;
             this.error = null;
+            this.successMsg = null;
 
             try {
-                 const res = await fetch('/api/documents', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ filename: this.filename, content: this.jsonContent })
-                });
-                const data = await res.json();
-                if(!data.success) throw new Error(data.error || "Unknown Error");
+                // Use FormData for true file upload
+                const formData = new FormData();
+                formData.append('file', this.selectedFile);
                 
-                this.filename = '';
-                this.jsonContent = null;
-                // Reset file input
+                const res = await fetch('/api/documents/upload', {
+                    method: 'POST',
+                    body: formData  // No Content-Type header - browser sets it automatically with boundary
+                });
+                
+                const data = await res.json();
+                
+                if(!res.ok || !data.success) {
+                    throw new Error(data.detail || data.error || "Upload failed");
+                }
+                
+                // Success
+                this.successMsg = `INGEST_COMPLETE: ${data.data.chunk_count} chunks indexed`;
+                this.selectedFile = null;
                 this.$refs.fileInput.value = '';
                 
-                alert("INGEST_COMPLETE: " + (data.message || "Data indexed successfully"));
                 this.loadDocuments();
             } catch(e) {
                 this.error = e.message;
