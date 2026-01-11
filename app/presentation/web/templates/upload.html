@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Upload Dokumen - RAG Chatbot{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📤 Upload Dokumen</h1>
+    <p>Upload dokumen JSON untuk dijadikan knowledge base chatbot.</p>
+</div>
+
+<div class="upload-container" x-data="uploadForm()">
+    <div class="upload-box">
+        <h2>Upload JSON</h2>
+        <div class="form-group">
+            <label for="filename">Nama File</label>
+            <input type="text" id="filename" x-model="filename" placeholder="contoh: data-produk.json" class="input">
+        </div>
+        <div class="form-group">
+            <label for="content">Konten JSON</label>
+            <textarea id="content" x-model="content" rows="10" class="textarea" placeholder='[{"title": "Judul", "content": "Isi dokumen..."}]'></textarea>
+        </div>
+        <div class="form-group">
+            <p class="help-text">Format: Array of objects dengan field <code>content</code>, <code>text</code>, atau <code>body</code>.</p>
+        </div>
+        <button @click="upload()" class="btn btn-primary btn-block" :disabled="loading">
+            <span x-show="!loading">Upload Dokumen</span>
+            <span x-show="loading">⏳ Memproses...</span>
+        </button>
+        <div x-show="message" class="alert" :class="success ? 'alert-success' : 'alert-error'">
+            <span x-text="message"></span>
+        </div>
+    </div>
+    
+    <div class="document-list">
+        <h2>📚 Dokumen Tersimpan</h2>
+        <div id="document-list-content"><p class="loading">Loading...</p></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function uploadForm() {
+    return {
+        filename: '', content: '', loading: false, message: '', success: false,
+        async upload() {
+            if (!this.filename || !this.content) { this.message = 'Mohon isi nama file dan konten.'; this.success = false; return; }
+            try {
+                this.loading = true; this.message = '';
+                const parsed = JSON.parse(this.content);
+                const response = await fetch('/api/documents', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ filename: this.filename, content: parsed })
+                });
+                const data = await response.json();
+                if (data.success) { this.message = data.message; this.success = true; this.filename = ''; this.content = ''; loadDocuments(); }
+                else { this.message = data.error || 'Terjadi kesalahan'; this.success = false; }
+            } catch (e) { this.message = 'Format JSON tidak valid: ' + e.message; this.success = false; }
+            finally { this.loading = false; }
+        }
+    }
+}
+async function loadDocuments() {
+    const container = document.getElementById('document-list-content');
+    try {
+        const response = await fetch('/api/documents');
+        const data = await response.json();
+        if (data.success && data.data.documents.length > 0) {
+            let html = '<ul class="doc-list">';
+            for (const doc of data.data.documents) { html += `<li class="doc-item"><span class="doc-name">${doc.filename}</span><span class="doc-date">${new Date(doc.created_at).toLocaleDateString('id-ID')}</span></li>`; }
+            html += '</ul>'; container.innerHTML = html;
+        } else { container.innerHTML = '<p class="empty">Belum ada dokumen.</p>'; }
+    } catch (e) { container.innerHTML = '<p class="error">Gagal memuat dokumen.</p>'; }
+}
+document.addEventListener('DOMContentLoaded', loadDocuments);
+</script>
+{% endblock %}

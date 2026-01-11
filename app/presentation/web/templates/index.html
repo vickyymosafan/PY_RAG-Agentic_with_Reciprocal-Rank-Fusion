@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Home - RAG Chatbot{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>🤖 RAG Chatbot</h1>
+    <p class="hero-subtitle">
+        Chatbot dengan Retrieval Augmented Generation untuk menjawab pertanyaan berdasarkan dokumen Anda.
+    </p>
+    
+    <div class="hero-features">
+        <div class="feature-card">
+            <div class="feature-icon">📤</div>
+            <h3>Upload Dokumen</h3>
+            <p>Upload dokumen JSON untuk dijadikan knowledge base.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🔍</div>
+            <h3>Hybrid Search</h3>
+            <p>Kombinasi BM25 + Vector Search dengan RRF fusion.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">💬</div>
+            <h3>Chat Cerdas</h3>
+            <p>Tanya jawab dengan konteks dokumen yang relevan.</p>
+        </div>
+    </div>
+    
+    <div class="hero-actions">
+        <a href="/upload" class="btn btn-primary">Upload Dokumen</a>
+        <a href="/chat" class="btn btn-secondary">Mulai Chat</a>
+    </div>
+</div>
+
+<section class="section">
+    <h2>Cara Menggunakan</h2>
+    <ol class="steps">
+        <li><strong>Upload Dokumen</strong> - Siapkan file JSON dengan format:<pre><code>[{"title": "Judul", "content": "Isi dokumen..."}]</code></pre></li>
+        <li><strong>Tunggu Proses</strong> - Sistem akan memproses dan mengindeks dokumen Anda.</li>
+        <li><strong>Mulai Chat</strong> - Ajukan pertanyaan dan dapatkan jawaban berdasarkan dokumen.</li>
+    </ol>
+</section>
+{% endblock %}

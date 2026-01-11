@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Chat - RAG Chatbot{% endblock %}
+
+{% block content %}
+<div class="chat-container" x-data="chatApp()">
+    <div class="chat-header">
+        <h1>💬 Chat dengan RAG</h1>
+        <button @click="clearHistory()" class="btn btn-sm">🗑️ Clear</button>
+    </div>
+    
+    <div class="chat-messages" id="chat-messages">
+        <template x-for="msg in messages" :key="msg.id">
+            <div class="message" :class="msg.role">
+                <div class="message-avatar"><span x-text="msg.role === 'user' ? '👤' : '🤖'"></span></div>
+                <div class="message-content">
+                    <p x-text="msg.content"></p>
+                    <span class="message-time" x-text="msg.time"></span>
+                </div>
+            </div>
+        </template>
+        <div x-show="loading" class="message assistant">
+            <div class="message-avatar">🤖</div>
+            <div class="message-content"><p class="typing">Sedang mengetik<span class="dots">...</span></p></div>
+        </div>
+    </div>
+    
+    <div class="chat-input">
+        <form @submit.prevent="sendMessage()">
+            <input type="text" x-model="input" placeholder="Ketik pertanyaan Anda..." class="input chat-input-field" :disabled="loading">
+            <button type="submit" class="btn btn-primary" :disabled="loading || !input.trim()">Kirim</button>
+        </form>
+    </div>
+    
+    <div x-show="sources.length > 0" class="sources-panel">
+        <h4>📚 Sumber:</h4>
+        <ul><template x-for="source in sources"><li x-text="source"></li></template></ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function chatApp() {
+    return {
+        messages: [], input: '', loading: false, sessionId: null, sources: [], messageId: 0,
+        init() { this.loadHistory(); },
+        async loadHistory() {
+            try {
+                const response = await fetch('/api/chat/history');
+                const data = await response.json();
+                if (data.success && data.data.messages) {
+                    this.sessionId = data.data.session_id;
+                    this.messages = data.data.messages.map(m => ({
+                        id: ++this.messageId, role: m.role, content: m.content,
+                        time: new Date(m.created_at).toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'})
+                    }));
+                    this.scrollToBottom();
+                }
+            } catch (e) { console.error('Failed to load history:', e); }
+        },
+        async sendMessage() {
+            if (!this.input.trim() || this.loading) return;
+            const userMessage = this.input.trim(); this.input = '';
+            this.messages.push({ id: ++this.messageId, role: 'user', content: userMessage, time: new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'}) });
+            this.scrollToBottom(); this.loading = true; this.sources = [];
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ message: userMessage, session_id: this.sessionId })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    this.sessionId = data.data.session_id; this.sources = data.data.sources || [];
+                    this.messages.push({ id: ++this.messageId, role: 'assistant', content: data.data.message, time: new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'}) });
+                } else {
+                    this.messages.push({ id: ++this.messageId, role: 'assistant', content: 'Maaf, terjadi kesalahan: ' + (data.error || 'Unknown'), time: new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'}) });
+                }
+            } catch (e) {
+                this.messages.push({ id: ++this.messageId, role: 'assistant', content: 'Maaf, terjadi kesalahan koneksi.', time: new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'}) });
+            } finally { this.loading = false; this.scrollToBottom(); }
+        },
+        async clearHistory() {
+            try { await fetch('/api/chat/history', {method: 'DELETE'}); this.messages = []; this.sessionId = null; this.sources = []; }
+            catch (e) { console.error('Failed to clear history:', e); }
+        },
+        scrollToBottom() { this.$nextTick(() => { document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight; }); }
+    }
+}
+</script>
+{% endblock %}
