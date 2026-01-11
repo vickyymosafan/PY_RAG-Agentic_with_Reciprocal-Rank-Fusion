@@ -18,7 +18,7 @@
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
         
-        <!-- Upload Card -->
+        <!-- Dropzone / Input Card -->
         <div class="tech-card">
             <div class="tech-card-header">
                 <span class="font-mono" style="color: var(--text-tertiary)">INPUT_STREAM</span>
@@ -26,18 +26,39 @@
             </div>
             
             <form @submit.prevent="handleUpload">
-                <div style="margin-bottom: 1.5rem;">
-                    <label style="display: block; font-family: 'JetBrains Mono'; font-size: 0.75rem; margin-bottom: 0.5rem; color: var(--text-secondary); text-transform: uppercase;">Target Filename</label>
-                    <input type="text" x-model="filename" placeholder="dataset_v1.json" class="input font-mono" required>
+                <!-- Dropzone Area -->
+                <div 
+                    class="dropzone-area"
+                    @dragover.prevent="dragover = true"
+                    @dragleave.prevent="dragover = false"
+                    @drop.prevent="handleDrop($event)"
+                    :class="{'drag-active': dragover}"
+                    style="border: 2px dashed var(--border-mid); padding: 3rem 2rem; text-align: center; margin-bottom: 1.5rem; transition: all 0.2s; cursor: pointer; position: relative; background: var(--sys-bg);"
+                    @click="$refs.fileInput.click()"
+                >
+                    <input type="file" x-ref="fileInput" @change="handleFileSelect($event)" accept=".json" style="display: none;">
+                    
+                    <!-- Icon -->
+                    <div style="color: var(--text-tertiary); margin-bottom: 1rem;">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    </div>
+                    
+                    <div x-show="!filename" style="color: var(--text-secondary); font-family: 'JetBrains Mono'">
+                        DRAG_DROP_FILE or <span style="text-decoration: underline; color: var(--primary)">BROWSE_LOCALLY</span>
+                    </div>
+                    
+                    <div x-show="filename" style="color: var(--success); font-family: 'JetBrains Mono'">
+                        FILE_SELECTED: <span x-text="filename" style="font-weight: bold"></span>
+                        <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-top: 0.5rem">READY_TO_INGEST</div>
+                    </div>
                 </div>
-                
-                <div style="margin-bottom: 1.5rem;">
-                    <label style="display: block; font-family: 'JetBrains Mono'; font-size: 0.75rem; margin-bottom: 0.5rem; color: var(--text-secondary); text-transform: uppercase;">Data Payload (JSON)</label>
-                    <textarea x-model="jsonContent" class="textarea font-mono" rows="12" placeholder='[{"title": "Doc1", "content": "..."}]' required style="background: var(--sys-surface); border: 1px solid var(--border-dim); color: var(--text-primary); font-size: 0.8rem;"></textarea>
+
+                <div x-show="error" style="margin-bottom: 1rem; color: var(--danger); font-size: 0.8rem; font-family: 'JetBrains Mono'">
+                    ERR: <span x-text="error"></span>
                 </div>
-                
-                <button type="submit" class="btn btn-primary btn-block" :disabled="loading">
-                    <span x-text="loading ? 'PROCESSING SEQUENCE...' : 'INITIATE UPLOAD'"></span>
+
+                <button type="submit" class="btn btn-primary btn-block" :disabled="loading || !jsonContent">
+                    <span x-text="loading ? 'PROCESSING_STREAM...' : 'INITIATE_INGEST_SEQUENCE'"></span>
                 </button>
             </form>
         </div>
@@ -49,20 +70,17 @@
                 <span class="font-mono" x-text="documents.length + ' ENTRIES'"></span>
             </div>
 
-            <div x-show="error" style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); padding: 1rem; margin-bottom: 1rem; color: var(--danger); font-family: 'JetBrains Mono'; font-size: 0.8rem;">
-                ERR: <span x-text="error"></span>
-            </div>
-
             <div x-show="loading" style="text-align: center; padding: 2rem; color: var(--primary);">
-                <div style="font-family: 'JetBrains Mono'; animation: pulse 1s infinite">SYNCING TO VECTOR_DB...</div>
+                <div style="font-family: 'JetBrains Mono'; animation: pulse 1s infinite">SYNCING_DATA_PIPE...</div>
+                <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-top: 0.5rem">CHUNKING & EMBEDDING IN PROGRESS</div>
             </div>
 
-            <ul class="doc-list" x-show="!loading" style="max-height: 500px; overflow-y: auto;">
+            <ul class="doc-list" x-show="!loading" style="max-height: 400px; overflow-y: auto;">
                 <template x-for="doc in documents" :key="doc.id">
                     <li class="doc-item">
                         <div>
                             <div style="font-family: 'JetBrains Mono'; font-size: 0.9rem; color: var(--text-primary)" x-text="doc.filename"></div>
-                            <div style="font-size: 0.75rem; color: var(--text-tertiary)" x-text="'ID: ' + doc.id.substring(0,8) + '...' + ' | ' + new Date(doc.created_at).toLocaleDateString()"></div>
+                            <div style="font-size: 0.75rem; color: var(--text-tertiary)" x-text="'ID: ' + doc.id.substring(0,8) + '...' + ' | ' + new Date(doc.created_at).toISOString().split('T')[0]"></div>
                         </div>
                         <span class="doc-badge" style="background: var(--surface); border: 1px solid var(--success); color: var(--success)">INDEXED</span>
                     </li>
@@ -74,6 +92,13 @@
         </div>
     </div>
 </div>
+
+<style>
+.dropzone-area:hover, .dropzone-area.drag-active {
+    border-color: var(--primary) !important;
+    background: rgba(124, 58, 237, 0.05) !important;
+}
+</style>
 {% endblock %}
 
 {% block scripts %}
@@ -81,9 +106,10 @@
 function uploadApp() {
     return {
         filename: '',
-        jsonContent: '',
+        jsonContent: null,
         loading: false,
         error: null,
+        dragover: false,
         documents: [],
         
         init() {
@@ -95,8 +121,7 @@ function uploadApp() {
                 this.loading = true;
                 const res = await fetch('/api/documents'); 
                 const data = await res.json();
-                if(data.success && data.data) {
-                    // Handle structure difference if any
+                if(data.success) {
                     this.documents = data.data.documents || data.data;
                 }
             } catch(e) {
@@ -105,59 +130,65 @@ function uploadApp() {
                 this.loading = false;
             }
         },
+
+        handleDrop(e) {
+            this.dragover = false;
+            const files = e.dataTransfer.files;
+            if (files.length > 0) this.processFile(files[0]);
+        },
+
+        handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length > 0) this.processFile(files[0]);
+        },
+
+        processFile(file) {
+            this.error = null;
+            this.filename = file.name;
+            
+            // Allow JSON files only for now
+            if (!file.name.endsWith('.json')) {
+                this.error = "INVALID_FILE_TYPE: Only .json supported";
+                this.jsonContent = null;
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const content = JSON.parse(e.target.result);
+                    if (!Array.isArray(content)) throw new Error("Root must be Array");
+                    this.jsonContent = content; // Store parsed object
+                } catch (err) {
+                    this.error = "PARSE_ERROR: Invalid JSON";
+                    this.jsonContent = null;
+                }
+            };
+            reader.readAsText(file);
+        },
         
         async handleUpload() {
+            if (!this.jsonContent) return;
+            
             this.loading = true;
             this.error = null;
-            try {
-                // Validation
-                let parsed;
-                try {
-                    parsed = JSON.parse(this.jsonContent);
-                } catch(e) {
-                    throw new Error("INVALID_JSON_FORMAT");
-                }
-                
-                if(!Array.isArray(parsed)) {
-                    throw new Error("PAYLOAD_MUST_BE_ARRAY");
-                }
 
-                const res = await fetch('/api/documents', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        filename: this.filename,
-                        documents: parsed
-                    }) // Match backend expectation: "documents" field if pydantic, or "content" if simple
-                });
-                
-                // Note: Previous code used { filename, content: parsed }, check backend. 
-                // Assuming standard RAG payload often uses 'documents' list. 
-                // If backend expects 'content', we might need to adjust.
-                // Let's stick to the previous working format which seemed to be {filename, content}.
-                
-                // ADJUSTMENT: The viewed file used { filename:this.filename, content: parsed }
-                // So I will revert to that to ensure backend compatibility
-                
-            } catch(e) {
-                // We'll re-run fetch with correct body below
-            }
-            
-            // Retry block for Fetch
             try {
-                 let parsed = JSON.parse(this.jsonContent);
                  const res = await fetch('/api/documents', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ filename: this.filename, content: parsed })
+                    body: JSON.stringify({ filename: this.filename, content: this.jsonContent })
                 });
                 const data = await res.json();
                 if(!data.success) throw new Error(data.error || "Unknown Error");
                 
                 this.filename = '';
-                this.jsonContent = '';
+                this.jsonContent = null;
+                // Reset file input
+                this.$refs.fileInput.value = '';
+                
+                alert("INGEST_COMPLETE: " + (data.message || "Data indexed successfully"));
                 this.loadDocuments();
-                alert("UPLOAD_COMPLETE: ACKNOWLEDGED");
             } catch(e) {
                 this.error = e.message;
             } finally {
